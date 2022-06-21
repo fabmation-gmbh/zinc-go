@@ -18,7 +18,7 @@ func main() {
 		zinc.SetBasicAuth(user, passwd),
 	)
 
-	idx := cli.IndexService().
+	idx := cli.CreateIndex().
 		Name("test_index").
 		IndexStorageType(meta.IndexStorageDisk).
 		AddMappingProperty(meta.NewIndexMappingProperty("@timestamp", meta.IdxPropertyDate)).
