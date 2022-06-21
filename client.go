@@ -33,3 +33,9 @@ func NewClient(opts ...clientOpt) *Client {
 func (c *Client) IndexService() *IndexService {
 	return NewIndexService(c)
 }
+
+// DocumentService returns a new DocumentService object.
+func (c *Client) DocumentService() *DocumentService {
+	return NewDocumentService(c)
+}
+

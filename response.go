@@ -10,11 +10,18 @@ const (
 	ResponseOk ResponseMessage = "ok"
 )
 
-// IndexCreateResponse is the response returned from the server when creating an index.
+// IndexCreateResponse is the response returned by the server when creating an index.
 type IndexCreateResponse struct {
 	Message ResponseMessage `json:"message"`
 	// Index is the name of the new index.
 	Index string `json:"index"`
 	// StorageType is the storage type of the new index.
 	StorageType meta.IndexStorageType `json:"storage_type"`
+}
+
+// DocumentCreateResponse is the response returned by the server when creating a document.
+type DocumentCreateResponse struct {
+	Message ResponseMessage `json:"message"`
+	// ID is the document ID.
+	ID string `json:"id"`
 }
