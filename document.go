@@ -46,3 +46,20 @@ func (d *DocumentService) Create(ctx context.Context) (DocumentCreateResponse, e
 
 	return resp, nil
 }
+
+// CreateWithID creates a new document with a custom ID.
+func (d *DocumentService) CreateWithID(ctx context.Context, id string) (DocumentCreateResponse, error) {
+	var resp DocumentCreateResponse
+
+	_, err := d.cli.c.R().
+		SetResult(&resp).
+		SetBody(d.data).
+		SetPathParam("index", d.index).
+		SetPathParam("id", id).
+		Post("/{index}/_doc/{id}")
+	if err != nil {
+		return DocumentCreateResponse{}, err
+	}
+
+	return resp, nil
+}

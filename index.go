@@ -6,29 +6,38 @@ import (
 	"github.com/fabmation-gmbh/zinc-go/pkg/meta"
 )
 
-// IndexService provides methods to manage indicies.
-type IndexService struct {
+// IndexCreateService provides methods to manage indicies.
+type IndexCreateService struct {
 	cli *Client
 
-	// name is the index name.
-	name        string
-	storageType meta.IndexStorageType
-	props       map[string]meta.IndexMappingProperty
+	req struct {
+		Name        string                `json:"name"`
+		StorageType meta.IndexStorageType `json:"storage_type"`
+		Mappings    struct {
+			Props map[string]meta.IndexMappingProperty `json:"properties"`
+		} `json:"mappings,omitempty"`
+
+		// TODO: Support settings
+		// Settings    *IndexSettings         `json:"settings,omitempty"`
+	}
 }
 
-// NewIndexService returns a fully initialized IndexService.
-func NewIndexService(cli *Client) *IndexService {
-	return &IndexService{
-		cli:   cli,
-		props: make(map[string]meta.IndexMappingProperty),
+// NewIndexCreateService returns a fully initialized IndexCreateService.
+func NewIndexCreateService(cli *Client) *IndexCreateService {
+	svc := &IndexCreateService{
+		cli: cli,
 	}
+
+	svc.req.Mappings.Props = make(map[string]meta.IndexMappingProperty)
+
+	return svc
 }
 
 // Name sets the name of the index.
 //
 // The IndexService object is returned to allow stacking method calls.
-func (i *IndexService) Name(name string) *IndexService {
-	i.name = name
+func (i *IndexCreateService) Name(name string) *IndexCreateService {
+	i.req.Name = name
 
 	return i
 }
@@ -36,8 +45,8 @@ func (i *IndexService) Name(name string) *IndexService {
 // IndexStorageType sets the storage type of the index.
 //
 // The IndexService object is returned to allow stacking method calls.
-func (i *IndexService) IndexStorageType(storage meta.IndexStorageType) *IndexService {
-	i.storageType = storage
+func (i *IndexCreateService) IndexStorageType(storage meta.IndexStorageType) *IndexCreateService {
+	i.req.StorageType = storage
 
 	return i
 }
@@ -45,40 +54,31 @@ func (i *IndexService) IndexStorageType(storage meta.IndexStorageType) *IndexSer
 // AddMappingProperty adds the given index property to the index.
 //
 // The IndexService object is returned to allow stacking method calls.
-func (i *IndexService) AddMappingProperty(prop meta.IndexMappingProperty) *IndexService {
-	i.props[prop.Name] = prop
+func (i *IndexCreateService) AddMappingProperty(prop meta.IndexMappingProperty) *IndexCreateService {
+	i.req.Mappings.Props[prop.Name] = prop
 
 	return i
 }
 
 // Create creates the index.
-func (i *IndexService) Create(ctx context.Context) (IndexCreateResponse, error) {
-	type props struct {
-		Props map[string]meta.IndexMappingProperty `json:"properties"`
-	}
-	type idxCreateReq struct {
-		Name        string `json:"name"`
-		StorageType string `json:"storage_type"`
-		Mappings    props  `json:"mappings,omitempty"`
-	}
-
-	data := idxCreateReq{
-		Name:        i.name,
-		StorageType: i.storageType.String(),
-		Mappings: props{
-			Props: i.props,
-		},
-	}
-
+func (i *IndexCreateService) Create(ctx context.Context) (IndexCreateResponse, error) {
 	var resp IndexCreateResponse
 
 	_, err := i.cli.c.R().
 		SetResult(&resp).
-		SetBody(data).
+		SetBody(i.req).
 		Post("/index")
 	if err != nil {
 		return IndexCreateResponse{}, err
 	}
 
 	return resp, nil
+}
+
+// IndexGetMappingResponse holds the index mapping.
+type IndexGetMappingResponse struct {
+	// Name is the index name.
+	Name string `json:"name"`
+	// Mappings holds the index mappings.
+	Mappings meta.Mappings `json:"mappings"`
 }

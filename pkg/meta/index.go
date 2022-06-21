@@ -1,5 +1,7 @@
 package meta
 
+import "time"
+
 // IndexStorageType is a storage type of an index.
 type IndexStorageType uint8
 
@@ -93,4 +95,25 @@ func NewIndexMappingProperty(name string, fieldType IndexPropertyType) IndexMapp
 	}
 
 	return prop
+}
+
+// Mappings represent index mappings.
+type Mappings struct {
+	Properties map[string]IndexMappingProperty `json:"properties,omitempty"`
+}
+
+// Index represents an index.
+type Index struct {
+	Name        string           `json:"name"`
+	StorageType IndexStorageType `json:"storage_type"`
+	StorageSize uint64           `json:"storage_size"`
+	DocNum      uint64           `json:"doc_num"`
+	DocTimeMin  int64            `json:"doc_time_min"`
+	DocTimeMax  int64            `json:"doc_time_max"`
+	ShardNum    int              `json:"shard_num"`
+	// Shards      []*IndexShard  `json:"shards"`
+	// Settings *IndexSettings `json:"settings,omitempty"`
+	Mappings *Mappings `json:"mappings,omitempty"`
+	CreateAt time.Time `json:"create_at"`
+	UpdateAt time.Time `json:"update_at"`
 }
